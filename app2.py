@@ -30,7 +30,7 @@ def fonction_de_reechantillonage(df, colonnes, frequence, fonction_agregation):
     return df_reechantillonne
 
 # Demander à l'utilisateur de télécharger son propre fichier CSV
-uploaded_file = st.file_uploader('Téléchargez votre fichier CSV (séparateur: point-virgule, première colonne: Date)', type=['csv'])
+uploaded_file = st.file_uploader('Téléchargez votre fichier CSV (séparateur: point-virgule, UTF-8, première colonne: Date)', type=['csv'])
 
 if uploaded_file is not None:
     # Charger le fichier CSV avec le séparateur point-virgule et la première colonne en tant que dates
