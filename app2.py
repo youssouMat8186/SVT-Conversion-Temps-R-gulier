@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-
 import base64
+
 
 def get_csv_download_link(df, filename="donnees_reechantillonnees.csv"):
     # Ajoutez l'indice (la colonne Date) au fichier CSV
@@ -29,18 +29,33 @@ def fonction_de_reechantillonage(df, colonnes, frequence, fonction_agregation):
  
     return df_reechantillonne
 
-# Demander à l'utilisateur de télécharger son propre fichier CSV
-uploaded_file = st.file_uploader('Téléchargez votre fichier CSV (séparateur: point-virgule, UTF-8, première colonne: Date)', type=['csv'])
+uploaded_file = st.file_uploader('Téléchargez votre fichier CSV (séparateur: point-virgule, UTF-8)', type=['csv'])
 
 if uploaded_file is not None:
-    # Charger le fichier CSV avec le séparateur point-virgule et la première colonne en tant que dates
     try:
-        df = pd.read_csv(uploaded_file, sep=';', parse_dates=[0], index_col=0)
+        df = pd.read_csv(uploaded_file, sep=';')
+        #st.write(df.head())
+        # Afficher les noms des colonnes pour que l'utilisateur puisse choisir
+        date_columns = st.multiselect('Choisissez les colonnes qui représentent la période (date et/ou heure):', df.columns)
+
+        if date_columns:
+            # Concaténer les colonnes sélectionnées pour former la colonne 'Date'
+            df.insert(0, 'Time',df[date_columns].apply(lambda row: ' '.join(row.values.astype(str)), axis=1) )
+            # Supprimer les colonnes utilisées pour former la date
+            df = df.drop(columns=date_columns)
+
+            # Vous pouvez convertir la colonne 'Date' en datetime si nécessaire
+            df['Time'] = pd.to_datetime(df['Time'], errors='coerce')
+            # Définir la colonne 'Time' comme nouvel index du DataFrame
+            df.set_index('Time', inplace=True)
+
+        #st.write(df.head())  # Afficher les premières lignes pour vérifier
+
     except Exception as e:
         st.error(f"Erreur lors du chargement du fichier : {e}")
         st.stop()
 
-    # Afficher les données brutes
+   # Afficher les données brutes
     st.subheader('Données brutes:')
     st.write(df)
 
